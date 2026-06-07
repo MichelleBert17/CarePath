@@ -1,0 +1,363 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PATIENT
+  DRIVER
+  COORDINATOR
+  ADMIN
+  PARTNER
+}
+
+enum RideStatus {
+  PENDING
+  MATCHED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  FALLBACK_NEEDED
+}
+
+enum AppointmentType {
+  ONCOLOGY
+  CARDIOLOGY
+  NEUROLOGY
+  DIALYSIS
+  MENTAL_HEALTH
+  POST_SURGICAL
+  SPECIALIST
+  OTHER
+}
+
+enum CreditStatus {
+  ACTIVE
+  DEPLETED
+  EXPIRED
+}
+
+// ─── Core User ────────────────────────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  phone        String   @unique
+  passwordHash String
+  role         Role
+  firstName    String
+  lastName     String
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  patient     Patient?
+  driver      Driver?
+  coordinator Coordinator?
+  partner     InstitutionalPartner?
+
+  @@map("users")
+}
+
+// ─── Patient ──────────────────────────────────────────────────────────────────
+
+model Patient {
+  id              String  @id @default(cuid())
+  userId          String  @unique
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  county          String
+  state           String
+  zipCode         String
+  hasSmartphone   Boolean @default(false)
+  prefersSms      Boolean @default(true)
+  prefersVoice    Boolean @default(false)
+  primaryLanguage String  @default("English")
+  notes           String? // coordinator-visible notes (no diagnosis stored here)
+
+  // Equity & Demographics
+  raceEthnicity   String?
+  disability      String?
+  incomeBracket   String?
+  barriers        String? // JSON array or comma-separated: ["language","mobility","tech"]
+
+  appointments RideRequest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("patients")
+}
+
+// ─── Driver ───────────────────────────────────────────────────────────────────
+
+model Driver {
+  id               String  @id @default(cuid())
+  userId           String  @unique
+  user             User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  county           String
+  state            String
+  vehicleCapacity  Int     @default(4)
+  isInFallbackPool Boolean @default(false) // rapid-response roster
+  isAvailableNow   Boolean @default(false)
+  maxMilesOneWay   Int     @default(50)
+  preferredDays    String? // JSON array of days e.g. ["MON","WED","FRI"]
+  communityNotes   String? // why they volunteer — visible to coordinators
+  ridesCompleted   Int     @default(0)
+  reliabilityScore Float   @default(5.0)
+
+  rides          RideRequest[]
+  depotRoutes    DepotRouteDriver[]
+  notifications  Notification[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("drivers")
+}
+
+// ─── Coordinator ──────────────────────────────────────────────────────────────
+
+model Coordinator {
+  id          String  @id @default(cuid())
+  userId      String  @unique
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  county      String
+  state       String
+  organization String? // church, clinic, nonprofit, etc.
+  stipendActive Boolean @default(false)
+  isVerified   Boolean @default(false)
+
+  rideRequests  RideRequest[]
+  depotRoutes   DepotRoute[]
+  notifications Notification[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("coordinators")
+}
+
+// ─── Institutional Partner ────────────────────────────────────────────────────
+
+model InstitutionalPartner {
+  id           String @id @default(cuid())
+  userId       String @unique
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization String
+  county       String
+  state        String
+  isVerified   Boolean @default(false)
+
+  credits RideCredit[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("institutional_partners")
+}
+
+// ─── Appointment ──────────────────────────────────────────────────────────────
+
+model Appointment {
+  id              String          @id @default(cuid())
+  appointmentType AppointmentType
+  clinicName      String
+  clinicCity      String
+  clinicState     String
+  appointmentDate DateTime
+  estimatedMiles  Int
+  isRecurring     Boolean         @default(false)
+  recurrenceNote  String?         // e.g. "every Tuesday"
+  notes           String?
+
+  // Health Impact
+  wasMissed       Boolean?        @default(false)
+  missedReason    String?
+  impactNotes     String?
+// ─── Ride Event Logging ──────────────────────────────────────────────────────
+
+model RideEvent {
+  id            String      @id @default(cuid())
+  rideRequestId String
+  rideRequest   RideRequest @relation(fields: [rideRequestId], references: [id])
+  eventType     String      // e.g. "STATUS_CHANGE", "FALLBACK_TRIGGERED", "NO_SHOW", "CANCELLED"
+  oldStatus     RideStatus?
+  newStatus     RideStatus?
+  reason        String?
+  actorRole     Role?       // who triggered the event
+  actorId       String?
+  createdAt     DateTime    @default(now())
+
+  @@map("ride_events")
+}
+
+// ─── Survey / Satisfaction ───────────────────────────────────────────────────
+
+model SurveyResponse {
+  id            String      @id @default(cuid())
+  rideRequestId String?
+  rideRequest   RideRequest? @relation(fields: [rideRequestId], references: [id])
+  patientId     String?
+  patient       Patient?    @relation(fields: [patientId], references: [id])
+  driverId      String?
+  driver        Driver?     @relation(fields: [driverId], references: [id])
+  coordinatorId String?
+  coordinator   Coordinator? @relation(fields: [coordinatorId], references: [id])
+  npsScore      Int?        // 0-10
+  satisfaction  Int?        // 1-5
+  comments      String?
+  submittedAt   DateTime    @default(now())
+
+  @@map("survey_responses")
+}
+
+// ─── Ride Cost & ROI ─────────────────────────────────────────────────────────
+
+model RideCostLog {
+  id            String      @id @default(cuid())
+  rideRequestId String
+  rideRequest   RideRequest @relation(fields: [rideRequestId], references: [id])
+  costCents     Int         // cost in cents
+  fundingSource String      // e.g. "GRANT", "MEDICAID", "PRIVATE", "FAMILY"
+  estimatedSavingsCents Int?
+  notes         String?
+  createdAt     DateTime    @default(now())
+
+  @@map("ride_cost_logs")
+}
+
+// ─── Communication Engagement ────────────────────────────────────────────────
+
+model CommunicationLog {
+  id            String      @id @default(cuid())
+  userId        String?
+  user          User?       @relation(fields: [userId], references: [id])
+  channel       String      // "sms", "voice", "email"
+  direction     String      // "sent", "received"
+  message       String?
+  status        String?     // "delivered", "failed", "opt_out", "responded"
+  relatedId     String?     // e.g. rideRequestId, notificationId
+  createdAt     DateTime    @default(now())
+
+  @@map("communication_logs")
+}
+
+// ─── Ride Request ─────────────────────────────────────────────────────────────
+
+model RideRequest {
+  id            String     @id @default(cuid())
+  patientId     String
+  patient       Patient    @relation(fields: [patientId], references: [id])
+  appointmentId String     @unique
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  coordinatorId String?
+  coordinator   Coordinator? @relation(fields: [coordinatorId], references: [id])
+  driverId      String?
+  driver        Driver?    @relation(fields: [driverId], references: [id])
+  creditId      String?
+  credit        RideCredit? @relation(fields: [creditId], references: [id])
+
+  status           RideStatus @default(PENDING)
+  pickupAddress    String
+  pickupTime       DateTime
+  confirmedAt      DateTime?
+  completedAt      DateTime?
+  cancelledAt      DateTime?
+  cancellationNote String?
+  isFallbackUsed   Boolean    @default(false)
+  patientNoShow    Boolean    @default(false)
+
+  notifications Notification[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ride_requests")
+}
+
+// ─── Depot Route (Scheduled Community Runs) ───────────────────────────────────
+
+model DepotRoute {
+  id            String  @id @default(cuid())
+  coordinatorId String
+  coordinator   Coordinator @relation(fields: [coordinatorId], references: [id])
+  depotName     String  // "First Baptist Church parking lot"
+  depotAddress  String
+  county        String
+  state         String
+  destinationCity  String
+  destinationState String
+  departureTime    DateTime
+  returnTime       DateTime?
+  maxPassengers    Int       @default(6)
+  isActive         Boolean   @default(true)
+  recurrenceNote   String?   // "Every Tuesday"
+
+  drivers DepotRouteDriver[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("depot_routes")
+}
+
+model DepotRouteDriver {
+  id           String     @id @default(cuid())
+  depotRouteId String
+  depotRoute   DepotRoute @relation(fields: [depotRouteId], references: [id])
+  driverId     String
+  driver       Driver     @relation(fields: [driverId], references: [id])
+  confirmedAt  DateTime?
+
+  @@unique([depotRouteId, driverId])
+  @@map("depot_route_drivers")
+}
+
+// ─── Ride Credits (Prepay / Layaway) ─────────────────────────────────────────
+
+model RideCredit {
+  id        String               @id @default(cuid())
+  partnerId String
+  partner   InstitutionalPartner @relation(fields: [partnerId], references: [id])
+  totalCredits     Int
+  usedCredits      Int            @default(0)
+  remainingCredits Int
+  status           CreditStatus   @default(ACTIVE)
+  expiresAt        DateTime?
+  notes            String?
+
+  rides RideRequest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ride_credits")
+}
+
+// ─── Notifications (SMS / Voice) ──────────────────────────────────────────────
+
+model Notification {
+  id            String  @id @default(cuid())
+  rideRequestId String?
+  rideRequest   RideRequest? @relation(fields: [rideRequestId], references: [id])
+  driverId      String?
+  driver        Driver?      @relation(fields: [driverId], references: [id])
+  coordinatorId String?
+  coordinator   Coordinator? @relation(fields: [coordinatorId], references: [id])
+
+  channel   String  // "sms" | "voice" | "email"
+  recipient String  // phone number or email
+  message   String
+  sentAt    DateTime?
+  delivered Boolean  @default(false)
+  twilioSid String?
+
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
