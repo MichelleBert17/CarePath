@@ -30,6 +30,7 @@ This folder is the primary source of truth for:
 
 ### Structure
 
+- `case-study-summary.md` - Compact, mobile-friendly overview of all case studies.
 - `case-studies/` - Individual conversations and case studies.
 - `patterns.md` - Cross-case patterns (problems, impacts, behaviors).
 - `validation-to-feature-mapping.md` - How validation informs product features and roadmap.
