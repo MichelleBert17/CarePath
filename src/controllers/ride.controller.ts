@@ -4,6 +4,21 @@ import { AuthRequest } from '../middleware/auth';
 import { AppError } from '../middleware/errorHandler';
 import { RideStatus } from '@prisma/client';
 
+const WHEELCHAIR_KEYWORDS = ['wheelchair', 'mobility', 'nontransferable', 'non-transferable'];
+
+const textHasKeyword = (value: string | null | undefined, keywords: string[]): boolean => {
+  if (!value) return false;
+  const lowered = value.toLowerCase();
+  return keywords.some((keyword) => lowered.includes(keyword));
+};
+
+const buildCandidateScore = (reliabilityScore: number, ridesCompleted: number, maxMilesOneWay: number, estimatedMiles: number): number => {
+  const reliabilityWeight = reliabilityScore * 12;
+  const experienceWeight = Math.min(ridesCompleted, 40) * 0.5;
+  const rangeWeight = maxMilesOneWay >= estimatedMiles ? 10 : 0;
+  return Math.round((reliabilityWeight + experienceWeight + rangeWeight) * 10) / 10;
+};
+
 // Patient creates a ride request
 export const createRideRequest = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -81,13 +96,150 @@ export const assignDriver = async (req: AuthRequest, res: Response, next: NextFu
     const { rideId } = req.params;
     const { driverId } = req.body;
 
+    const driver = await prisma.driver.findUnique({
+      where: { id: driverId },
+      include: { user: { select: { firstName: true, lastName: true, phone: true } } },
+    });
+    if (!driver) return next(new AppError('Driver not found', 404));
+
     const ride = await prisma.rideRequest.update({
       where: { id: rideId },
       data: { driverId, status: RideStatus.MATCHED },
       include: { appointment: true, driver: { include: { user: { select: { firstName: true, lastName: true, phone: true } } } } },
     });
 
+    if (driver.isInFallbackPool) {
+      await prisma.rideEvent.create({
+        data: {
+          rideRequestId: ride.id,
+          eventType: 'ASSIGNED_FROM_COMMUNITY_POOL',
+          oldStatus: RideStatus.PENDING,
+          newStatus: RideStatus.MATCHED,
+          reason: 'Coordinator assigned a fallback/community driver',
+          actorRole: req.user?.role,
+          actorId: req.user?.userId,
+        },
+      });
+    } else {
+      await prisma.rideEvent.create({
+        data: {
+          rideRequestId: ride.id,
+          eventType: 'ASSIGNED_FROM_PRIMARY_POOL',
+          oldStatus: RideStatus.PENDING,
+          newStatus: RideStatus.MATCHED,
+          reason: 'Coordinator assigned a primary network driver',
+          actorRole: req.user?.role,
+          actorId: req.user?.userId,
+        },
+      });
+    }
+
     res.json(ride);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Coordinator: get pooled transportation candidates for a specific ride
+export const getPoolingOptions = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { rideId } = req.params;
+    const coordinator = await prisma.coordinator.findUnique({ where: { userId: req.user!.userId } });
+    if (!coordinator) return next(new AppError('Coordinator profile not found', 404));
+
+    const ride = await prisma.rideRequest.findFirst({
+      where: { id: rideId, coordinatorId: coordinator.id },
+      include: { appointment: true, patient: true },
+    });
+    if (!ride) return next(new AppError('Ride not found for this coordinator', 404));
+
+    const needsWheelchairAccessible =
+      textHasKeyword(ride.patient.disability, WHEELCHAIR_KEYWORDS) ||
+      textHasKeyword(ride.patient.barriers, WHEELCHAIR_KEYWORDS) ||
+      textHasKeyword(ride.patient.notes, WHEELCHAIR_KEYWORDS);
+
+    const hoursUntilPickup = (new Date(ride.pickupTime).getTime() - Date.now()) / (1000 * 60 * 60);
+    const urgencyLevel = hoursUntilPickup <= 12 ? 'critical' : hoursUntilPickup <= 24 ? 'high' : 'normal';
+
+    const drivers = await prisma.driver.findMany({
+      where: {
+        county: ride.patient.county,
+        state: ride.patient.state,
+        isAvailableNow: true,
+      },
+      include: { user: { select: { firstName: true, lastName: true, phone: true } } },
+    });
+
+    const estimatedMiles = ride.appointment.estimatedMiles ?? 0;
+    const mapped = drivers.map((driver) => {
+      const isCommunityVolunteer = driver.isInFallbackPool || Boolean(driver.communityNotes);
+      const score = buildCandidateScore(driver.reliabilityScore, driver.ridesCompleted, driver.maxMilesOneWay, estimatedMiles);
+      return {
+        id: driver.id,
+        poolType: isCommunityVolunteer ? 'community' : 'primary',
+        name: `${driver.user.firstName} ${driver.user.lastName}`.trim(),
+        phone: driver.user.phone,
+        county: driver.county,
+        state: driver.state,
+        isAvailableNow: driver.isAvailableNow,
+        isInFallbackPool: driver.isInFallbackPool,
+        capacity: driver.vehicleCapacity,
+        maxMilesOneWay: driver.maxMilesOneWay,
+        reliabilityScore: driver.reliabilityScore,
+        ridesCompleted: driver.ridesCompleted,
+        communityNotes: driver.communityNotes,
+        canServeDistance: driver.maxMilesOneWay >= estimatedMiles,
+        matchScore: score,
+      };
+    });
+
+    const primaryPool = mapped
+      .filter((candidate) => candidate.poolType === 'primary')
+      .sort((a, b) => b.matchScore - a.matchScore);
+
+    const communityPool = mapped
+      .filter((candidate) => candidate.poolType === 'community')
+      .sort((a, b) => b.matchScore - a.matchScore);
+
+    const recommendedActions: string[] = [];
+    if (needsWheelchairAccessible) {
+      recommendedActions.push('Prioritize candidates who have wheelchair-capable vehicles.');
+    }
+    if (urgencyLevel !== 'normal') {
+      recommendedActions.push('Activate same-day fallback escalation before appointment risk increases.');
+    }
+    if (communityPool.length === 0) {
+      recommendedActions.push('No community volunteers currently available. Trigger broader county outreach.');
+    }
+
+    res.json({
+      rideId: ride.id,
+      status: ride.status,
+      urgencyLevel,
+      pickupTime: ride.pickupTime,
+      appointment: {
+        type: ride.appointment.appointmentType,
+        clinicName: ride.appointment.clinicName,
+        clinicCity: ride.appointment.clinicCity,
+        clinicState: ride.appointment.clinicState,
+        estimatedMiles,
+      },
+      constraints: {
+        needsWheelchairAccessible,
+        noBackupRisk: true,
+      },
+      pools: {
+        primary: {
+          count: primaryPool.length,
+          candidates: primaryPool,
+        },
+        community: {
+          count: communityPool.length,
+          candidates: communityPool,
+        },
+      },
+      recommendedActions,
+    });
   } catch (err) {
     next(err);
   }

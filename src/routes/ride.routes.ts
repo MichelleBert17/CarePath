@@ -4,6 +4,7 @@ import {
   createRideRequest,
   getPendingRides,
   assignDriver,
+  getPoolingOptions,
   triggerFallback,
   confirmRide,
   completeRide,
@@ -17,6 +18,7 @@ router.use(authenticate);
 
 router.post('/', requireRole(Role.PATIENT), createRideRequest);
 router.get('/pending', requireRole(Role.COORDINATOR), getPendingRides);
+router.get('/:rideId/pooling-options', requireRole(Role.COORDINATOR), getPoolingOptions);
 router.patch('/:rideId/assign', requireRole(Role.COORDINATOR), assignDriver);
 router.patch('/:rideId/fallback', requireRole(Role.COORDINATOR), triggerFallback);
 router.patch('/:rideId/confirm', requireRole(Role.DRIVER), confirmRide);

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Calendar, Car, Users, CreditCard,
-  MessageSquare, BarChart3, LogOut, Heart, MapPin
+  MessageSquare, BarChart3, LogOut, Heart, MapPin, Route
 } from 'lucide-react'
 
 type Role = 'patient' | 'driver' | 'coordinator' | 'admin'
@@ -25,6 +25,7 @@ const navItems: Record<Role, { label: string; href: string; icon: React.ElementT
   ],
   coordinator: [
     { label: 'Dashboard', href: '/coordinator', icon: LayoutDashboard },
+    { label: 'Pooling Hub', href: '/coordinator/pooling', icon: Route },
     { label: 'Ride Requests', href: '/coordinator/rides', icon: Car },
     { label: 'Patients', href: '/coordinator/patients', icon: Users },
     { label: 'Drivers', href: '/coordinator/drivers', icon: Heart },
