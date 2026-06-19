@@ -24,6 +24,11 @@ This repository includes a lightweight validation pre-pack used to capture found
 1. Case Study #1: Kevin (Transportation Driver)
 2. Case Study #2: Churchie (Dialysis Patient)
 3. Case Study #3: Alyssa (Heart and Asthma Patient)
+4. Case Study #4: Katina (RN, Arkansas Baptist Hospital)
+5. Case Study #5: Elijah (Registered Nurse BSN)
+6. Case Study #6: Monica (CNA / Home Health Caregiver)
+7. Case Study #7: Michelle (Parent Caregiver, Medicaid Wheelchair Transportation)
+8. Case Study #8: Kevin Lee (Healthcare Transportation Specialist and Veteran Advocate)
 
 ### How To Use
 
