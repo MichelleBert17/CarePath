@@ -13,6 +13,7 @@ type Role = 'patient' | 'driver' | 'coordinator' | 'admin'
 const navItems: Record<Role, { label: string; href: string; icon: React.ElementType }[]> = {
   patient: [
     { label: 'Dashboard', href: '/patient', icon: LayoutDashboard },
+    { label: 'Request Ride', href: '/patient/intake', icon: Route },
     { label: 'My Rides', href: '/patient/rides', icon: Car },
     { label: 'Appointments', href: '/patient/appointments', icon: Calendar },
     { label: 'Messages', href: '/patient/messages', icon: MessageSquare },

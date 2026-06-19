@@ -26,6 +26,9 @@ export const createRideRequest = async (req: AuthRequest, res: Response, next: N
       appointmentType, clinicName, clinicCity, clinicState, appointmentDate,
       estimatedMiles, isRecurring, recurrenceNote, appointmentNotes,
       pickupAddress, pickupTime, creditId,
+      mobilityNeeds, isWheelchairRequired, isNonTransferable,
+      requestedAdvanceWindowHours, urgencyLevel,
+      needsSameDayFallback, allowsCommunityVolunteer,
     } = req.body;
 
     const patient = await prisma.patient.findUnique({ where: { userId: req.user!.userId } });
@@ -35,6 +38,19 @@ export const createRideRequest = async (req: AuthRequest, res: Response, next: N
     const coordinator = await prisma.coordinator.findFirst({
       where: { county: patient.county, state: patient.state, isVerified: true },
     });
+
+    const intakeNotes: string[] = [];
+    if (mobilityNeeds) intakeNotes.push(`mobility_needs: ${String(mobilityNeeds)}`);
+    if (typeof isWheelchairRequired === 'boolean') intakeNotes.push(`wheelchair_required: ${isWheelchairRequired ? 'yes' : 'no'}`);
+    if (typeof isNonTransferable === 'boolean') intakeNotes.push(`non_transferable: ${isNonTransferable ? 'yes' : 'no'}`);
+    if (typeof requestedAdvanceWindowHours === 'number') intakeNotes.push(`advance_window_hours: ${requestedAdvanceWindowHours}`);
+    if (urgencyLevel) intakeNotes.push(`urgency_level: ${String(urgencyLevel)}`);
+    if (typeof needsSameDayFallback === 'boolean') intakeNotes.push(`same_day_fallback_needed: ${needsSameDayFallback ? 'yes' : 'no'}`);
+    if (typeof allowsCommunityVolunteer === 'boolean') intakeNotes.push(`community_volunteer_opt_in: ${allowsCommunityVolunteer ? 'yes' : 'no'}`);
+
+    const compiledNotes = [appointmentNotes, intakeNotes.length ? `[intake] ${intakeNotes.join('; ')}` : null]
+      .filter(Boolean)
+      .join(' | ');
 
     const appointment = await prisma.appointment.create({
       data: {
@@ -46,7 +62,7 @@ export const createRideRequest = async (req: AuthRequest, res: Response, next: N
         estimatedMiles,
         isRecurring: isRecurring || false,
         recurrenceNote,
-        notes: appointmentNotes,
+        notes: compiledNotes || null,
       },
     });
 
