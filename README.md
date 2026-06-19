@@ -6,6 +6,54 @@ CarePath is a transportation coordination tool that helps patients anywhere in t
 
 The project is focused on removing transportation and communication failures that cause missed care. It is being shaped through early validation conversations with patients, caregivers, and transportation stakeholders.
 
+## Quick Start
+
+### Prerequisites
+
+- [Node.js 18+](https://nodejs.org)
+- [PostgreSQL](https://postgresql.org) (local or remote)
+- npm (included with Node.js)
+
+### Installation
+
+```bash
+git clone https://github.com/Debalent/CarePath.git
+cd CarePath
+npm run setup
+```
+
+The setup script will:
+1. Check Node.js and npm versions
+2. Create `.env` from `.env.example`
+3. Prompt for your `DATABASE_URL`, `JWT_SECRET`, and optional Twilio credentials
+4. Install API and UI dependencies
+5. Generate the Prisma client and run database migrations
+6. Print startup instructions
+
+### Starting the app
+
+```bash
+# Start both API and UI together
+npm run dev:all
+
+# Or start separately
+npm run dev                        # API → http://localhost:3001
+cd carepath-ui && npm run dev      # UI  → http://localhost:3000
+```
+
+### Reconfigure environment
+
+```bash
+npm run setup:reconfigure
+```
+
+### Prisma Studio (browse the database)
+
+```bash
+npm run prisma:studio
+```
+
+---
 ## Validation Workspace (Early Discovery)
 
 This repository includes a lightweight validation pre-pack used to capture founder interviews and prepare evidence for investor and cohort updates across any geography.

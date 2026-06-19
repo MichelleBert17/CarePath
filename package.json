@@ -4,11 +4,16 @@
   "description": "Transportation coordination tool for patients anywhere in the country — Builders & Backers Mobility Program",
   "main": "dist/server.js",
   "scripts": {
+    "setup": "node scripts/setup.js",
+    "setup:reconfigure": "node scripts/setup.js --reconfigure",
     "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
+    "dev:ui": "cd carepath-ui && npm run dev",
+    "dev:all": "npx concurrently \"npm run dev\" \"npm run dev:ui\"",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "test": "jest --runInBand --forceExit"
   },
@@ -30,6 +35,7 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20.14.2",
     "@types/supertest": "^6.0.2",
+    "concurrently": "^8.2.2",
     "jest": "^29.7.0",
     "prisma": "^5.14.0",
     "supertest": "^7.0.0",
@@ -41,6 +47,8 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "testMatch": ["**/tests/**/*.test.ts"]
+    "testMatch": [
+      "**/tests/**/*.test.ts"
+    ]
   }
 }
