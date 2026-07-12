@@ -1,7 +1,14 @@
 import type { NextConfig } from "next";
 
+const isGithubPagesBuild = process.env.GITHUB_ACTIONS === "true";
+const repositoryName = process.env.GITHUB_REPOSITORY?.split("/")[1] ?? "";
+const basePath = isGithubPagesBuild && repositoryName ? `/${repositoryName}` : "";
+
 const nextConfig: NextConfig = {
-  output: "standalone",
+  output: isGithubPagesBuild ? "export" : "standalone",
+  basePath: basePath || undefined,
+  assetPrefix: basePath ? `${basePath}/` : undefined,
+  trailingSlash: true,
   images: {
     // Allow the logo served from the same origin
     unoptimized: true,
