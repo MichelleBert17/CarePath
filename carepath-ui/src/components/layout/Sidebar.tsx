@@ -9,6 +9,8 @@ import {
   MessageSquare, BarChart3, LogOut, Heart, MapPin, Route
 } from 'lucide-react'
 
+const CAREPATH_LOGO_URL = 'https://raw.githubusercontent.com/Debalent/CarePath/main/carepath-ui/public/carepath-logo.png'
+
 type Role = 'patient' | 'driver' | 'coordinator' | 'admin'
 
 const navItems: Record<Role, { label: string; href: string; icon: React.ElementType }[]> = {
@@ -64,7 +66,7 @@ export function Sidebar({ role, userName = 'User' }: SidebarProps) {
       <div className="px-6 py-5 border-b border-slate-100">
         <div className="flex items-center gap-3">
           <Image
-            src="/carepath-logo.png"
+            src={CAREPATH_LOGO_URL}
             alt="CarePath"
             width={36}
             height={36}

@@ -2,6 +2,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Ambulance, ArrowRight, Bus, Car, HandHeart, ShieldCheck, TimerReset } from 'lucide-react'
 
+const CAREPATH_LOGO_URL = 'https://raw.githubusercontent.com/Debalent/CarePath/main/carepath-ui/public/carepath-logo.png'
+
 const pillars = [
   {
     icon: Bus,
@@ -35,7 +37,7 @@ export default function Home() {
               {/* Logo + wordmark */}
               <div className="flex items-center gap-3 mb-5">
                 <Image
-                  src="/carepath-logo.png"
+                  src={CAREPATH_LOGO_URL}
                   alt="CarePath"
                   width={52}
                   height={52}
