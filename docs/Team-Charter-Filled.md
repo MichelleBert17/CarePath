@@ -18,13 +18,13 @@ The platform is completed, functional, and deliverable as a usable product.
 
 **Members Skills/Knowledge/Expertise (How will you capitalize on the strengths of each member?):**
 
-- Desmond: Backend development, architecture, leadership
+- Demond: Backend development, architecture, leadership
 - Michelle: Frontend, design, communication
 - Remington: AI support, coding, troubleshooting
 
 **Team Member Roles (How will you assign group roles? What are the strengths and weaknesses of each team member?):**
 
-- Desmond: Project lead and product direction; assigns project targets and tracks milestones.
+- Demond: Project lead and product direction; assigns project targets and tracks milestones.
 - Michelle: Design lead and communication support; handles UX, visuals, and presentation flow.
 - Remington: Technical troubleshooting lead; supports AI-enabled features and cross-team problem solving.
 
