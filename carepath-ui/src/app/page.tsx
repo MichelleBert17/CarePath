@@ -136,6 +136,8 @@ export default function Home() {
             gap: 10,
             flexWrap: "wrap",
             padding: "10px 0",
+           
+
           }}
         >
           <Link
@@ -148,17 +150,37 @@ export default function Home() {
               borderRadius: 10,
               fontSize: 14,
               fontWeight: 700,
-              background: "#ffffff",
+              background: "#f3e2f7",
               color: "#0c6bc2",
-              border: "1px solid #bfdbfe",
+              border: "1px solid #ae5a8b",
+              textDecoration: "none",
+               
+            }}
+          >
+            <UserRound size={16} />
+            Login
+          </Link>
+
+          <Link href="/patient/profile" className="..."
+           
+            href="/patient/profile"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 7,
+              padding: "9px 16px",
+              borderRadius: 10,
+              fontSize: 14,
+              fontWeight: 700,
+              background: "#f3e2f",
+              color: "#0c6bc2",
+              border: "1px solid #ae5a8b",
               textDecoration: "none",
             }}
           >
             <UserRound size={16} />
-             Login
+            My Profile
           </Link>
-
-         
           <Link
             href="/coordinator"
             style={{
@@ -169,8 +191,9 @@ export default function Home() {
               borderRadius: 10,
               fontSize: 14,
               fontWeight: 700,
-              background: "#5540a1",
-              color: "#ffffff",
+              background: "#f3e2f",
+              color: "#0c6bc2",
+              border: "1px solid #ae5a8b",
               textDecoration: "none",
               boxShadow: "0 2px 8px rgba(85, 64, 161, 0.25)",
             }}
