@@ -8,7 +8,7 @@ import { AlertCircle } from "lucide-react";
 
 const DEFAULT_API_BASE =
   process.env.NEXT_PUBLIC_CAREPATH_API_URL ??
-  "http://localhost:3001/api";
+  "http://localhost:3000/api";
 
 const roleRedirect: Record<string, string> = {
   PATIENT: "/patient/dashboard",

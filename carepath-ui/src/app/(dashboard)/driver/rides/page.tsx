@@ -9,7 +9,7 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
 import { StatCard } from '@/components/ui/StatCard'
 import { demoRides, RideRow, statusVariant, toDisplayDate } from '@/lib/portal'
 
-const DEFAULT_API_BASE = process.env.NEXT_PUBLIC_CAREPATH_API_URL ?? 'http://localhost:3001/api'
+const DEFAULT_API_BASE = process.env.NEXT_PUBLIC_CAREPATH_API_URL ?? 'http://localhost:3000/api'
 
 export default function DriverRidesPage() {
   const [mode, setMode] = useState<'demo' | 'live'>('demo')
@@ -30,7 +30,7 @@ export default function DriverRidesPage() {
     if (!token) { setError('Driver JWT token required.'); return }
     setLoading(true); setError(null)
     try {
-      const res = await fetch(`${apiBase}/rides/my`, { headers, cache: 'no-store' })
+      const res = await fetch(`${apiBase}/rides/my-driver-rides`, { headers, cache: 'no-store' })
       if (!res.ok) throw new Error(`Failed (${res.status})`)
       setRides(await res.json()); setMsg('Rides loaded.')
     } catch (e) { setError(e instanceof Error ? e.message : 'Failed to load.') }

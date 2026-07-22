@@ -9,7 +9,7 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
 import { StatCard } from '@/components/ui/StatCard'
 import { demoDepotRoutes, DepotRouteRow, toDisplayDate } from '@/lib/portal'
 
-const DEFAULT_API_BASE = process.env.NEXT_PUBLIC_CAREPATH_API_URL ?? 'http://localhost:3001/api'
+const DEFAULT_API_BASE = process.env.NEXT_PUBLIC_CAREPATH_API_URL ?? 'http://localhost:3000/api'
 
 type NewRoute = { depotName: string; depotAddress: string; destinationCity: string; destinationState: string; departureTime: string; returnTime: string; maxPassengers: number; recurrenceNote: string }
 const emptyRoute: NewRoute = { depotName: '', depotAddress: '', destinationCity: 'Little Rock', destinationState: 'AR', departureTime: '', returnTime: '', maxPassengers: 6, recurrenceNote: '' }

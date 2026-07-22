@@ -3,7 +3,7 @@
 import { FormEvent, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { registerUser } from '../../../services/auth'
+import { registerUser } from '@/services/auth'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -42,6 +42,7 @@ export default function RegisterPage() {
         phone,
         email,
         password,
+        role: 'PATIENT',
       })
 
       console.log('Registration result:', result)
@@ -54,7 +55,7 @@ export default function RegisterPage() {
         After registration, send the patient to the longer
         profile form for address, insurance, ride needs, etc.
       */
-      router.push('/patient/profile/setup')
+      router.push('/patient/intake')
     } catch (error) {
       if (error instanceof Error) {
         setErrorMessage(error.message)

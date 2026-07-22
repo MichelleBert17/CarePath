@@ -1,3 +1,5 @@
+const DEFAULT_API_BASE = process.env.NEXT_PUBLIC_CAREPATH_API_URL ?? 'http://localhost:3000/api'
+
 export type LoginCredentials = {
   email: string
   password: string
@@ -17,13 +19,11 @@ export type LoginResponse = {
 export async function loginUser(
   credentials: LoginCredentials,
 ): Promise<LoginResponse> {
-  const response = await fetch('/api/auth/login', {
+  const response = await fetch(`${DEFAULT_API_BASE}/auth/login`, {
     method: 'POST',
-
     headers: {
       'Content-Type': 'application/json',
     },
-
     body: JSON.stringify(credentials),
   })
 
@@ -35,12 +35,14 @@ export async function loginUser(
 
   return data
 }
+
 export type RegistrationData = {
   firstName: string
   lastName: string
   phone: string
   email: string
   password: string
+  role?: string
 }
 
 export type RegistrationResponse = {
@@ -57,7 +59,7 @@ export type RegistrationResponse = {
 export async function registerUser(
   registrationData: RegistrationData,
 ): Promise<RegistrationResponse> {
-  const response = await fetch('/api/auth/register', {
+  const response = await fetch(`${DEFAULT_API_BASE}/auth/register`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
