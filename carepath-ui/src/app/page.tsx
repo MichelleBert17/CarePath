@@ -163,7 +163,6 @@ export default function Home() {
 
           <Link href="/patient/profile" className="..."
            
-            href="/patient/profile"
             style={{
               display: "inline-flex",
               alignItems: "center",

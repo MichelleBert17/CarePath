@@ -3,20 +3,58 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Car, Route, Users, Calendar, MessageSquare, MapPin, Heart, CreditCard, BarChart3 } from 'lucide-react'
+import {
+  LayoutDashboard,
+  Calendar,
+  Car,
+  User,
+  Users,
+  CreditCard,
+  MessageSquare,
+  BarChart3,
+  LogOut,
+  Heart,
+  MapPin,
+  Route,
+} from 'lucide-react'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { Topbar } from '@/components/layout/Topbar'
 
 type Role = 'patient' | 'driver' | 'coordinator' | 'admin'
 
 const bottomNavItems: Record<Role, { label: string; href: string; icon: React.ElementType }[]> = {
-  patient: [
-    { label: 'Home',     href: '/patient',        icon: LayoutDashboard },
-    { label: 'Ride',     href: '/patient/intake',  icon: Route },
-    { label: 'My Rides', href: '/patient/rides',   icon: Car },
-    { label: 'Appts',    href: '/patient/appointments', icon: Calendar },
-    { label: 'Messages', href: '/patient/messages', icon: MessageSquare },
-  ],
+ patient: [
+  {
+    label: 'Dashboard',
+    href: '/patient/dashboard',
+    icon: LayoutDashboard,
+  },
+  {
+    label: 'Request Ride',
+    href: '/patient/request-ride',
+    icon: Route,
+  },
+  {
+    label: 'My Rides',
+    href: '/patient/rides',
+    icon: Car,
+  },
+  {
+    label: 'Appointments',
+    href: '/patient/appointments',
+    icon: Calendar,
+  },
+  {
+    label: 'Messages',
+    href: '/patient/messages',
+    icon: MessageSquare,
+  },
+  {
+    label: 'My Profile',
+    href: '/patient/profile',
+    icon: Users,
+  },
+],
   driver: [
     { label: 'Home',    href: '/driver',              icon: LayoutDashboard },
     { label: 'Rides',   href: '/driver/rides',        icon: Car },

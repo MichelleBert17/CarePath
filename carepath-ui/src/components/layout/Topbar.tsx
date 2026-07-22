@@ -16,7 +16,7 @@ export function Topbar({ title, subtitle, onMenuClick }: TopbarProps) {
           <Menu size={20} />
         </button>
         <div>
-          <h1 style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{title}</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{title}</h1>
           {subtitle && <p style={{ fontSize: 13, color: '#94a3b8', marginTop: 3 }}>{subtitle}</p>}
         </div>
       </div>

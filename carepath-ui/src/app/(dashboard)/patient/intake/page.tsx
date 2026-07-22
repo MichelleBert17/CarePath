@@ -1,5 +1,6 @@
 "use client";
 
+import { Weight } from "lucide-react";
 import { FormEvent, useState } from "react";
 
 type Doctor = {
@@ -141,14 +142,18 @@ export default function PatientIntakePage() {
   const checkboxCardStyles =
     "flex cursor-pointer items-start gap-3 rounded-lg border border-purple-100 bg-[#fcf9fd] p-4 text-sm font-semibold text-slate-700 transition hover:border-[#ae5a8b]";
 
+  
   return (
-    <main
-      className="min-h-screen px-4 py-10 sm:px-6"
-      style={{
-        background:
-          "linear-gradient(135deg, #f8edf5 0%, #f8f9ff 48%, #edf4ff 100%)",
-      }}
-    >
+  <main
+    className="min-h-screen px-4 py-10 sm:px-6"
+    style={{
+      background:
+        "linear-gradient(135deg, #136e5e 0%, #c5afce 45%, #9d64a3 75%)",
+    }}
+  >
+  
+      
+    
       <div
         className="w-full"
         style={{
@@ -162,7 +167,7 @@ export default function PatientIntakePage() {
           <p
             style={{
               marginBottom: "8px",
-              color: "#ae5a8b",
+              color: "#eeb0ef",
               fontSize: "18px",
               fontWeight: 900,
               letterSpacing: "0.35em",
@@ -182,8 +187,9 @@ export default function PatientIntakePage() {
               maxWidth: "680px",
               margin: "18px auto 0",
               textAlign: "center",
-              color: "#475569",
-              fontSize: "16px",
+              color: "#121314",
+              fontSize: "16px ",
+              fontWeight: "bold",
               lineHeight: "1.6",
             }}
           >
