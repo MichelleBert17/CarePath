@@ -63,24 +63,29 @@ export default function PatientMessagesPage() {
   return (
     <DashboardLayout role="patient" title="Messages" subtitle="Communication with your coordinator and driver" userName="Patient">
       <div className="cp-space-y-4">
-        <section style={{ borderRadius: 16, padding: 20, background: 'linear-gradient(135deg, #136e5e, #094f91)', color: '#fff' }}>
-          <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#99e6d8', marginBottom: 6 }}>Communication portal</p>
-          <h2 style={{ fontSize: 20, fontWeight: 800 }}>Stay informed about your ride status and coordinate with your care team.</h2>
+        <section   style={{
+    borderRadius: 16,
+    padding: 20,
+    background:
+      "linear-gradient(135deg, #e3ca59 0%, #b72898 50%, #13c6cf 100%)",
+    color: "#ffffff",}}>
+          <p style={{ fontSize: 15, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#300733', marginBottom: 6 }}>Communication portal</p>
+          <h2 style={{fontSize: 20, fontWeight: 800, color: '#fff' }}>Stay informed about your ride status and coordinate with your care team.</h2>
         </section>
 
         <Card>
           <div className="cp-space-y-3">
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
               <Badge variant={mode === 'live' ? 'success' : 'warning'}>{mode === 'live' ? 'Live' : 'Demo'}</Badge>
-              <Button size="sm" variant="secondary" onClick={() => { setMode('demo'); setMessages(demoPortalMessages) }}>Demo</Button>
-              <Button size="sm" onClick={() => { setMode('live'); loadMessages() }}>Live</Button>
+              <Button size="sm" style={{ background:" #ecb163", color: "white",}} variant="secondary" onClick={() => { setMode('demo'); setMessages(demoPortalMessages) }}>Demo</Button>
+              <Button size="sm" style={{ background:" #b72898", color: "white",}} onClick={() => { setMode('live'); loadMessages() }}>Live</Button>
             </div>
             <input value={apiBase} onChange={e => setApiBase(e.target.value)} placeholder="API base URL" className="cp-input" />
             <input value={token} onChange={e => setToken(e.target.value)} placeholder="Patient JWT token" className="cp-input" />
             <input value={rideId} onChange={e => setRideId(e.target.value)} placeholder="Ride ID to view messages" className="cp-input" />
             <div style={{ display: 'flex', gap: 8 }}>
               <Button size="sm" variant="secondary" onClick={() => { const t = localStorage.getItem('carepath.patient.token'); if (t) setToken(t) }}>Load token</Button>
-              <Button size="sm" onClick={() => { localStorage.setItem('carepath.patient.token', token) }}>Save token</Button>
+              <Button size="sm" style={{ background:" #5d7db6", color: "fffff", }} onClick={() => { localStorage.setItem('carepath.patient.token', token) }}>Save token</Button>
               <Button size="sm" variant="secondary" onClick={loadMessages}>Load messages</Button>
             </div>
           </div>
@@ -91,13 +96,13 @@ export default function PatientMessagesPage() {
         <Card>
           <CardHeader><CardTitle><MessageSquare size={16} style={{ display: 'inline', marginRight: 8 }} />Ride communication log</CardTitle></CardHeader>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 400, overflowY: 'auto', padding: '4px 0' }}>
-            {messages.length === 0 && <p style={{ fontSize: 14, color: '#64748b' }}>No messages yet.</p>}
+            {messages.length === 0 && <p style={{ fontSize: 14, color: '#8b6474' }}>No messages yet.</p>}
             {messages.map(msg => (
-              <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '10px 14px', borderRadius: 12, background: msg.direction === 'inbound' ? '#f8fafc' : '#f0fdf9', border: '1px solid #e2e8f0' }}>
+              <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '10px 14px', borderRadius: 12, background: msg.direction === 'inbound' ? '#f8fafc' : '#e1eef5', border: '1px solid #e2e8f0' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                   {msg.user && <Badge variant={roleVariant(msg.user.role)}>{msg.user.firstName} {msg.user.lastName} · {msg.user.role}</Badge>}
                   <Badge variant="neutral">{msg.channel}</Badge>
-                  <span style={{ fontSize: 11, color: '#94a3b8', marginLeft: 'auto' }}>{toDisplayDate(msg.createdAt)}</span>
+                  <span style={{ fontSize: 11, color: '#b894a8', marginLeft: 'auto' }}>{toDisplayDate(msg.createdAt)}</span>
                 </div>
                 <p style={{ fontSize: 14, color: '#0f172a' }}>{msg.message}</p>
               </div>
@@ -107,7 +112,7 @@ export default function PatientMessagesPage() {
 
           <form onSubmit={send} style={{ display: 'flex', gap: 8, marginTop: 16 }}>
             <input value={text} onChange={e => setText(e.target.value)} placeholder="Type a message…" className="cp-input" style={{ flex: 1 }} />
-            <Button type="submit" disabled={sending || !text.trim()}><Send size={16} /></Button>
+            <Button style={{ background:" #b72898" }} type="submit" disabled={sending || !text.trim()}><Send size={16} /></Button>
           </form>
         </Card>
       </div>

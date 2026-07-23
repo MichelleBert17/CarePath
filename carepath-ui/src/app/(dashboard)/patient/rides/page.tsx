@@ -44,7 +44,7 @@ export default function PatientRidesPage() {
       <div className="cp-space-y-4">
         <section style={{ borderRadius: 16, padding: 20, background: 'linear-gradient(135deg, #136e5e, #094f91)', color: '#fff' }}>
           <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#99e6d8', marginBottom: 6 }}>Ride history</p>
-          <h2 style={{ fontSize: 20, fontWeight: 800 }}>Track all your medical transportation requests in one place.</h2>
+          <h2  style={{ fontSize: 20, fontWeight: 800, color: '#fff' }}>Track all your medical transportation requests in one place.</h2>
         </section>
 
         <Card>
